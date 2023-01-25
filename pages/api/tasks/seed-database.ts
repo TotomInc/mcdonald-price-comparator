@@ -141,6 +141,10 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+    if (process.env.CAN_SEED_DATABASE !== "true") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     if (req.method !== "GET") {
       return res.status(405).json({ message: "Method not allowed" });
     }
