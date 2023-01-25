@@ -98,3 +98,21 @@ export interface RestaurantInfoResponse {
   actualMaxAmountCAndC: number;
   actualMaxAmountMcDelivery: number;
 }
+
+export interface RestaurantCategoriesResponse {
+  [key: string]: {
+    ref: string;
+    title: string;
+    description: string;
+    signature: boolean;
+    pictures: {
+      id: number;
+      ref: string;
+      label?: string;
+      url: string;
+      activationDate: string;
+      types: string[];
+    }[];
+    workingHoursRef: string[];
+  };
+}
