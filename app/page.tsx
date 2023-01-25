@@ -1,7 +1,13 @@
-export default function Home() {
+import prisma from "@/lib/prisma";
+
+import { ProductPrices } from "@/components/sections/ProductPrices";
+
+export default async function Home() {
+  const products = await prisma.product.findMany();
+
   return (
-    <main>
-      <h1>Hello, World!</h1>
+    <main className="mx-auto max-w-5xl p-8">
+      <ProductPrices products={products} />
     </main>
   );
 }
