@@ -25,7 +25,7 @@ model Category {
   id           Int        @id @default(autoincrement())
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId Int
-  ref          String     @unique
+  ref          String
   name         String
 }
 
@@ -33,7 +33,7 @@ model Product {
   id           Int        @id @default(autoincrement())
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   restaurantId Int
-  ref          String     @unique
+  ref          String
   name         String
   designation  String
   description  String
