@@ -51,7 +51,7 @@ export function ProductPrices({ products }: { products: Product[] }) {
           {sorted.map((product) => (
             <div
               key={product.id}
-              className="flex space-x-4 border-t border-slate-700 py-4 px-4"
+              className="flex space-x-4 border-t border-slate-700 py-4 px-4 font-mono"
             >
               <p>
                 {new Intl.NumberFormat("fr-FR", {

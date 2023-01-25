@@ -8,7 +8,13 @@ module.exports = {
   ],
 
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)"],
+        display: ["var(--font-lexend)"],
+        mono: ["var(--font-jetbrains-mono)"],
+      },
+    },
   },
 
   plugins: [],
