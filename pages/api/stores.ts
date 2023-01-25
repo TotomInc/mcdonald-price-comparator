@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { DEFAULT_HEADERS } from "@/lib/constants";
+
 type WoosmapGridData = {
   data: { [key: string]: { store_id: string } };
   grid: string[];
@@ -19,11 +21,6 @@ const GRIDS = [
   "6-33-22",
   "6-33-21",
 ];
-
-const DEFAULT_HEADERS = {
-  origin: "https://www.mcdonalds.fr",
-  referrer: "https://www.mcdonalds.fr/",
-};
 
 export default async function handler(
   req: NextApiRequest,
