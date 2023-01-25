@@ -152,7 +152,7 @@ export default async function handler(
       (response) => response.json() as Promise<{ data: string[] }>
     );
 
-    for (let i = 0; i < 50; i += 1) {
+    for (let i = 0; i < stores.data.length; i += 1) {
       const start = performance.now();
       const restaurantRef = stores.data[i];
 
