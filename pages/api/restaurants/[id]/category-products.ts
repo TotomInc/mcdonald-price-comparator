@@ -37,7 +37,7 @@ export default async function handler(
       (await response.json()) as RestaurantCategoryProductsResponse[];
 
     const products = data.map((product) => ({
-      id: product.ref,
+      ref: product.ref,
       name: product.label,
       designation: product.designation,
       description: product.description,
