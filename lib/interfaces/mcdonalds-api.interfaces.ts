@@ -16,7 +16,7 @@ interface ConceptType {
   description: string;
 }
 
-interface RestaurantAddress {
+export interface RestaurantAddress {
   address1: string;
   zipCode: string;
   city: string;
@@ -72,7 +72,7 @@ interface SlotDetail2 {
   endHour: string;
 }
 
-interface Picture {
+export interface Picture {
   id: number;
   ref: string;
   label?: string;

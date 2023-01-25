@@ -1,11 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import type {
+  RestaurantCategoryProductsResponse as EndpointResponse,
+  BasicApiResponse,
+} from "@/lib/interfaces/api.interfaces";
 import type { RestaurantCategoryProductsResponse } from "@/lib/interfaces/mcdonalds-api.interfaces";
 import { DEFAULT_HEADERS } from "@/lib/constants";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<BasicApiResponse | EndpointResponse>
 ) {
   try {
     if (req.method !== "GET") {

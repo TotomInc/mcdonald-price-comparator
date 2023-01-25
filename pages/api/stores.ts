@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import type { BasicApiResponse } from "@/lib/interfaces/api.interfaces";
 import { DEFAULT_HEADERS } from "@/lib/constants";
 
 type WoosmapGridData = {
@@ -24,7 +25,7 @@ const GRIDS = [
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<BasicApiResponse | { data: string[] }>
 ) {
   try {
     if (req.method !== "GET") {
