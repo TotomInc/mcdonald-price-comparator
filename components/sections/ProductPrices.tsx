@@ -12,13 +12,29 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 
+type ProductPricesResponse = {
+  id: number;
+  price: number;
+  productId: number;
+  restaurantId: number;
+  restaurant: {
+    id: number;
+    city: string;
+    country: string;
+    name: string;
+    region: string;
+    storeId: string;
+    zipcode: string;
+  };
+}[];
+
 // @ts-ignore
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 export function ProductPrices({ products }: { products: Product[] }) {
   const [selectedProductId, setSelectedProductId] = React.useState<string>("");
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading } = useSWR<ProductPricesResponse>(
     `/api/public/product-prices?productId=${selectedProductId}`,
     fetcher
   );
