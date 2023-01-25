@@ -7,10 +7,13 @@ import useSWR from "swr";
 import {
   Select,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
+import { capitalizeWords } from "@/lib/utils";
 
 type ProductPricesResponse = {
   id: number;
@@ -44,19 +47,25 @@ export function ProductPrices({ products }: { products: Product[] }) {
 
   return (
     <>
-      <h1 className="mb-12 text-center text-3xl font-bold">Price Comparator</h1>
+      <h1 className="mb-12 bg-gradient-to-r from-pink-500 via-violet-500 to-indigo-500 bg-clip-text text-center text-3xl font-bold text-transparent">
+        McDonald&apos;s France Price Comparator
+      </h1>
 
       <Select onValueChange={(value) => setSelectedProductId(value)}>
-        <SelectTrigger className="w-[250px]">
+        <SelectTrigger className="max-w-[250px]">
           <SelectValue placeholder="Select a product" />
         </SelectTrigger>
 
         <SelectContent>
-          {products.map((product) => (
-            <SelectItem key={product.id} value={product.id.toString()}>
-              {product.name}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            <SelectLabel>Burgers</SelectLabel>
+
+            {products.map((product) => (
+              <SelectItem key={product.id} value={product.id.toString()}>
+                {product.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
 
@@ -64,23 +73,34 @@ export function ProductPrices({ products }: { products: Product[] }) {
 
       {data && sorted ? (
         <div className="mt-8">
+          <div className="flex justify-between px-8 py-4">
+            <p className="text-sm font-semibold">Restaurant</p>
+
+            <p className="text-sm font-semibold">Price (in €)</p>
+          </div>
+
           {sorted.map((product) => (
             <div
               key={product.id}
-              className="flex space-x-4 border-t border-slate-700 py-4 px-4 font-mono"
+              className="flex items-center justify-between space-x-4 border-t border-slate-700 py-4 px-8"
             >
-              <p>
+              <div className="flex flex-col">
+                <p className="font-medium">
+                  {capitalizeWords(product.restaurant.name)}
+                </p>
+
+                <p className="text-sm text-slate-400">
+                  {capitalizeWords(product.restaurant.city)}&nbsp;
+                  <span>({capitalizeWords(product.restaurant.region)})</span>
+                </p>
+              </div>
+
+              <p className="text-lg font-medium">
                 {new Intl.NumberFormat("fr-FR", {
                   style: "currency",
                   currency: "EUR",
                 }).format(product.price / 100)}
               </p>
-
-              <p>{product.restaurant.name}</p>
-
-              <p>{product.restaurant.city}</p>
-
-              <p>{product.restaurant.region}</p>
             </div>
           ))}
         </div>
