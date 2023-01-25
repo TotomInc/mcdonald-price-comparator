@@ -72,6 +72,15 @@ interface SlotDetail2 {
   endHour: string;
 }
 
+interface Picture {
+  id: number;
+  ref: string;
+  label?: string;
+  url: string;
+  activationDate: string;
+  types: string[];
+}
+
 export interface RestaurantInfoResponse {
   name: string;
   phone: string;
@@ -105,14 +114,31 @@ export interface RestaurantCategoriesResponse {
     title: string;
     description: string;
     signature: boolean;
-    pictures: {
-      id: number;
-      ref: string;
-      label?: string;
-      url: string;
-      activationDate: string;
-      types: string[];
-    }[];
+    pictures: Picture[];
     workingHoursRef: string[];
   };
+}
+
+export interface RestaurantCategoryProductsResponse {
+  type: string;
+  ref: string;
+  label: string;
+  designation: string;
+  description: string;
+  marketingGroup: string;
+  pictures: Picture[];
+  available: boolean;
+  eligible: boolean;
+  price: number;
+  foodType: string;
+  soda: boolean;
+  orderableToZero: boolean;
+  delivery: boolean;
+  nutriscore: string;
+  specificNutritionalCalculation: boolean;
+  workingHoursRefs: string[];
+  loyaltyMarketingGroup: string;
+  permanent: boolean;
+  canAdd: boolean;
+  cgi: boolean;
 }
