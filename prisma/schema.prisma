@@ -9,33 +9,37 @@ datasource db {
 }
 
 model Restaurant {
-  id         Int        @id @default(autoincrement())
-  storeId    String     @unique
-  name       String
-  country    String
-  region     String
-  zipcode    String
-  city       String
-  address    String
-  categories Category[]
-  products   Product[]
+  id                 Int                 @id @default(autoincrement())
+  storeId            String              @unique
+  name               String
+  country            String
+  region             String
+  zipcode            String
+  city               String
+  address            String
+  restaurantProducts RestaurantProduct[]
+}
+
+model RestaurantProduct {
+  id           Int        @id @default(autoincrement())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId Int
+  product      Product    @relation(fields: [productId], references: [id])
+  productId    Int
+  price        Int
 }
 
 model Category {
-  id           Int        @id @default(autoincrement())
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  restaurantId Int
-  ref          String
-  name         String
+  id   Int    @id @default(autoincrement())
+  ref  String @unique
+  name String
 }
 
 model Product {
-  id           Int        @id @default(autoincrement())
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  restaurantId Int
-  ref          String
-  name         String
-  designation  String
-  description  String
-  price        Int
+  id                 Int                 @id @default(autoincrement())
+  ref                String              @unique
+  name               String
+  designation        String
+  description        String
+  restaurantProducts RestaurantProduct[]
 }
