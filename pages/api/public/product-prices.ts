@@ -75,12 +75,19 @@ export default async function handler(
       return res.status(429).json({ message: "Too many requests" });
     }
 
-    const { productId, restaurantQuery, take = "100", skip = "0" } = req.query;
+    const {
+      productId,
+      restaurantQuery,
+      zipcodes,
+      take = "100",
+      skip = "0",
+    } = req.query;
 
     if (
       !productId ||
       Array.isArray(productId) ||
       Array.isArray(restaurantQuery) ||
+      Array.isArray(zipcodes) ||
       Array.isArray(take) ||
       Array.isArray(skip)
     ) {
@@ -93,6 +100,16 @@ export default async function handler(
     // Copy the array so that we don't mutate the original.
     // This is the array manipulated by filters and returned in the response.
     let productPrices = [...allProductPrices];
+
+    // Filter products by restaurant zipcode.
+    // This should be used to localize close restaurants after `/near-me` endpoint being called.
+    if (zipcodes) {
+      const codes = zipcodes.split(",");
+
+      productPrices = productPrices.filter((productPrice) =>
+        codes.includes(productPrice.restaurant.zipcode)
+      );
+    }
 
     // Filter by restaurant name, region, address, city and zipcode.
     if (restaurantQuery) {
