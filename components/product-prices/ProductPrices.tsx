@@ -5,11 +5,12 @@ import * as React from "react";
 import useSWR from "swr";
 
 import type { ProductPricesResponse } from "@/lib/interfaces/api.interfaces";
-import { ProductSelect } from "@/components/product-prices/ProductSelect";
-import { Pagination } from "@/components/product-prices/Pagination";
-import { ProductSkeleton } from "@/components/product-prices/ProductSkeleton";
-import { ProductItem } from "@/components/product-prices/ProductItem";
 import { fetcher } from "@/lib/utils";
+
+import { ProductSelect } from "./ProductSelect";
+import { Pagination } from "./Pagination";
+import { ProductSkeleton } from "./ProductSkeleton";
+import { ProductItem } from "./ProductItem";
 
 export function ProductPrices({ products }: { products: Product[] }) {
   const [selectedProductId, setSelectedProductId] = React.useState<string>("");

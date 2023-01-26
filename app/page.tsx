@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 
-import { ProductPrices } from "@/components/sections/ProductPrices";
+import { ProductPrices } from "@/components/product-prices/ProductPrices";
 
 export default async function Home() {
   const products = await prisma.product.findMany();
