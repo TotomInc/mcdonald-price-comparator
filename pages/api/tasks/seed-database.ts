@@ -1,7 +1,13 @@
-/* eslint no-await-in-loop: "off", no-console: "off" */
+/*
+  eslint
+    no-await-in-loop: "off",
+    no-console: "off",
+    no-underscore-dangle: "off",
+    @typescript-eslint/naming-convention: "off"
+*/
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { Product } from "@prisma/client";
 import { performance } from "node:perf_hooks";
+import consola from "consola";
 
 import type {
   RestaurantInfoResponse,
@@ -9,29 +15,8 @@ import type {
   RestaurantCategoryProductsResponse,
 } from "@/lib/interfaces/api.interfaces";
 import { BASE_URL } from "@/lib/constants";
+import { findBurgerCategory, getProducts } from "@/lib/seed";
 import prisma from "@/lib/prisma";
-
-let cachedBurgerCategoryRef: string | null = null;
-let cachedProducts: Product[] = [];
-
-async function findBurgerCategory() {
-  if (cachedBurgerCategoryRef) {
-    return cachedBurgerCategoryRef;
-  }
-
-  const categories = await prisma.category.findMany();
-
-  const burgerCategory = categories.find((category) =>
-    category.name.toLowerCase().includes("burgers")
-  );
-
-  if (burgerCategory) {
-    cachedBurgerCategoryRef = burgerCategory.ref;
-    return cachedBurgerCategoryRef;
-  }
-
-  return null;
-}
 
 async function createRestaurant(restaurantRef: string) {
   const restaurantInfo = await fetch(
@@ -98,8 +83,6 @@ async function createProducts(restaurantRef: string) {
         description: "No description yet",
       })),
     });
-
-    cachedProducts = await prisma.product.findMany();
   } else {
     throw new Error(
       "Products could not be created because no burger category was found"
@@ -113,27 +96,62 @@ async function createRestaurantProducts(
 ) {
   const burgerCategoryRef = await findBurgerCategory();
 
-  if (burgerCategoryRef) {
-    const products = await fetch(
-      `${BASE_URL}/api/restaurants/${restaurantRef}/category-products?categoryId=${burgerCategoryRef}`
-    ).then(
-      (response) =>
-        response.json() as Promise<RestaurantCategoryProductsResponse>
+  if (!burgerCategoryRef) {
+    return consola.error(
+      `Something went wrong in createRestaurantProducts, no burgerCategoryRef found for restaurantRef ${restaurantRef} or restaurantId ${restaurantId}`
     );
-
-    // Delete all existing restaurant products.
-    await prisma.restaurantProduct.deleteMany({ where: { restaurantId } });
-
-    await prisma.restaurantProduct.createMany({
-      data: products.map((product) => ({
-        restaurantId,
-        productId:
-          cachedProducts.find((p) => p.ref === product.ref)?.id ||
-          cachedProducts[0].id,
-        price: product.price,
-      })),
-    });
   }
+
+  // Get all products for this specific restaurant.
+  const storeProductsResponse = await fetch(
+    `${BASE_URL}/api/restaurants/${restaurantRef}/category-products?categoryId=${burgerCategoryRef}`
+  );
+
+  if (!storeProductsResponse.ok) {
+    return consola.error(
+      `Something went wrong in createRestaurantProducts, /api/restaurants/${restaurantRef}/category-products?categoryId=${burgerCategoryRef} didn't returned a successful response: ${storeProductsResponse.status}`
+    );
+  }
+
+  // Retrieve global products.
+  const products = await getProducts();
+  const storeProducts =
+    (await storeProductsResponse.json()) as RestaurantCategoryProductsResponse;
+
+  // Filter out unknown products, this is to prevent unknown products from being added
+  // without being created first in the `Product` model.
+  const storeProductsToCreate = storeProducts.filter((storeProduct) =>
+    products.find((product) => product.ref === storeProduct.ref)
+  );
+
+  // Retrieve separately unknown products in order to notify us that they need to be created.
+  const unknownStoreProducts = storeProducts.filter(
+    (storeProduct) =>
+      !products.find((product) => product.ref === storeProduct.ref)
+  );
+
+  if (unknownStoreProducts.length > 0) {
+    consola.warn(
+      `Some unknown products were found for the restaurantRef ${restaurantRef}:`,
+      unknownStoreProducts.map((unknownProduct) => ({
+        name: unknownProduct.name,
+        ref: unknownProduct.ref,
+      }))
+    );
+  }
+
+  // Delete all existing restaurant products.
+  await prisma.restaurantProduct.deleteMany({ where: { restaurantId } });
+
+  const { count } = await prisma.restaurantProduct.createMany({
+    data: storeProductsToCreate.map((storeProduct) => ({
+      restaurantId,
+      productId: products.find((p) => p.ref === storeProduct.ref)!.id,
+      price: storeProduct.price,
+    })),
+  });
+
+  return count;
 }
 
 export default async function handler(
@@ -149,8 +167,8 @@ export default async function handler(
       return res.status(405).json({ message: "Method not allowed" });
     }
 
-    let hasCreatedCategories = false;
-    let hasCreatedProducts = false;
+    let hasCreatedCategories = true;
+    let hasCreatedProducts = true;
 
     const stores = await fetch(`${BASE_URL}/api/stores`).then(
       (response) => response.json() as Promise<{ data: string[] }>
@@ -165,19 +183,29 @@ export default async function handler(
       if (!hasCreatedCategories) {
         await createCategories(restaurantRef);
         hasCreatedCategories = true;
+        consola.success("Initial categories created");
       }
 
       if (!hasCreatedProducts) {
         await createProducts(restaurantRef);
         hasCreatedProducts = true;
+        consola.success("Initial products created");
       }
 
-      await createRestaurantProducts(restaurantRef, restaurant.id);
+      const count = await createRestaurantProducts(
+        restaurantRef,
+        restaurant.id
+      );
 
       const stop = performance.now();
+      const duration = Math.round(stop - start);
 
-      console.log(`Restaurant ${restaurantRef} created in ${stop - start}ms`);
+      consola.success(
+        `Restaurant ref ${restaurantRef} created ${count} product(s) in ${duration}ms`
+      );
     }
+
+    consola.success(`Database successfully seeded`);
 
     return res.status(200).json({ message: "OK" });
   } catch (error) {
