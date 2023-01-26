@@ -1,15 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import type { BasicApiResponse } from "@/lib/interfaces/api.interfaces";
-import { DEFAULT_HEADERS } from "@/lib/constants";
+import { WOOSMAP_KEY, DEFAULT_HEADERS } from "@/lib/constants";
 
 type WoosmapGridData = {
   data: { [key: string]: { store_id: string } };
   grid: string[];
   keys: string[];
 };
-
-const WOOSMAP_KEY = "woos-77bec2e5-8f40-35ba-b483-67df0d5401be";
 
 const GRIDS = [
   "6-31-23",

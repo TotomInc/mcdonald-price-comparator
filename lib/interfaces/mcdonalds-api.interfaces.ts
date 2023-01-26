@@ -142,3 +142,54 @@ export interface RestaurantCategoryProductsResponse {
   canAdd: boolean;
   cgi: boolean;
 }
+
+export interface WoosmapStoreGeolocResponse {
+  type: "FeatureCollection";
+  pagination: {
+    page: number;
+    pageCount: number;
+  };
+  features: {
+    type: "Feature";
+    properties: {
+      store_id: string;
+      name: string;
+      contact: {
+        email: string | null;
+        phone: string | null;
+        website: string;
+      };
+      address: {
+        lines: string[];
+        country_code: string;
+        city: string;
+        zipcode: string;
+      };
+      user_properties: {
+        [key: string]: string;
+      };
+      tags: string[];
+      types: string[];
+      last_updated: Date;
+      distance: number;
+      open: {
+        open_now: boolean;
+        open_hours: {
+          end: string;
+          start: string;
+        }[];
+        week_day: number;
+        current_slice: {
+          end: string;
+          start: string;
+        };
+      };
+      weekly_opening: any;
+      opening_hours: any;
+    };
+    geometry: {
+      type: "Point";
+      coordinates: [number, number];
+    };
+  }[];
+}

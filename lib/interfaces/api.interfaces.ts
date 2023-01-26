@@ -53,3 +53,18 @@ export type ProductPricesResponse = {
     };
   }[];
 };
+
+// Response from endpoint `/api/public/near-me`.
+export type RestaurantsNearMeResponse = {
+  stores: {
+    storeId: string;
+    name: string;
+    country: string;
+    city: string;
+    address: string;
+    zipcode: string;
+    distance: number;
+    isOpen: boolean;
+    coordinates: [number, number];
+  }[];
+};
