@@ -9,7 +9,7 @@ export function ProductItem({
   product: ProductPricesResponse["products"][0];
 }) {
   return (
-    <div className="flex items-center justify-between space-x-4 border-t border-slate-700 py-4 px-8">
+    <div className="flex items-center justify-between space-x-4 border-t border-slate-700 py-4 px-4 sm:px-8">
       <div className="flex flex-col">
         <p className="font-medium">
           {capitalizeWords(product.restaurant.name)}

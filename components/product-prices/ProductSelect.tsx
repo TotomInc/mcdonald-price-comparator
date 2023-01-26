@@ -28,7 +28,7 @@ export function ProductSelect({
       onValueChange={(value) => setSelectedProductId(value)}
       disabled={isLoading}
     >
-      <SelectTrigger className="max-w-[250px]">
+      <SelectTrigger className="lg:max-w-[250px]">
         <SelectValue placeholder="Select a product" />
       </SelectTrigger>
 

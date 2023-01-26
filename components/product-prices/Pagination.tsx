@@ -37,7 +37,7 @@ export function Pagination({
   data,
 }: PaginationProps) {
   return (
-    <div className="mt-4 flex justify-between">
+    <div className="mt-8 flex flex-col items-center justify-between space-y-4 lg:flex-row lg:items-baseline lg:space-y-0">
       <div className="flex items-center space-x-4">
         {/* Go to first page. */}
         <PaginationButton

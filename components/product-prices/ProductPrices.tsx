@@ -55,7 +55,7 @@ export function ProductPrices({ products }: { products: Product[] }) {
 
       {(isLoading || data?.products) && (
         <div className="mt-8">
-          <div className="flex justify-between px-8 py-4">
+          <div className="flex justify-between px-4 py-4 sm:px-8">
             <p className="text-sm font-semibold">Restaurant</p>
 
             <p className="text-sm font-semibold">Price (in €)</p>
@@ -75,7 +75,7 @@ export function ProductPrices({ products }: { products: Product[] }) {
       )}
 
       {data && data.count !== undefined && (
-        <p className="mt-4 px-8 text-sm font-medium text-slate-300">
+        <p className="mt-4 px-4 text-sm font-medium text-slate-300 sm:px-8">
           <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
             {data.count}
           </span>{" "}
