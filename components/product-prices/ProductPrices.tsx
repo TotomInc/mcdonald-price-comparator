@@ -42,7 +42,7 @@ export function ProductPrices({ products }: { products: Product[] }) {
 
   return (
     <section>
-      <div className="flex justify-between">
+      <div className="flex justify-between space-x-4">
         <ProductSelect
           isLoading={isLoading}
           products={products}
