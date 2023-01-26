@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -36,65 +37,90 @@ export function Pagination({
   currentPage,
   data,
 }: PaginationProps) {
+  const [count, setCount] = React.useState<number>(0);
+  const [maxPage, setMaxPage] = React.useState<number>(1);
+
+  // On data change, make sure to update the cached count and maxPage values.
+  // This is done to avoid CLS issues and stale rendered values.
+  React.useEffect(() => {
+    if (data) {
+      setCount(data.count);
+      setMaxPage(Math.ceil(data.count / take));
+    }
+  }, [data, take]);
+
   return (
-    <div className="mt-8 flex flex-col items-center justify-between space-y-4 lg:flex-row lg:items-baseline lg:space-y-0">
-      <div className="flex items-center space-x-4">
-        {/* Go to first page. */}
-        <PaginationButton
-          onClick={() => setSkip(0)}
-          disabled={isLoading || skip === 0}
-        >
-          <ChevronFirst />
-        </PaginationButton>
+    <div className="mt-8 flex flex-col items-end lg:flex-row lg:items-center lg:justify-between">
+      <p className="order-2 mr-auto mt-4 text-sm font-medium text-slate-300 lg:order-1 lg:mt-0 lg:mr-0">
+        <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+          {count}
+        </span>{" "}
+        products.
+      </p>
 
-        {/* Go to previous page. */}
-        <PaginationButton
-          onClick={() => setSkip(skip - take)}
-          disabled={isLoading || skip === 0}
-        >
-          <ChevronLeft />
-        </PaginationButton>
+      <div className="order-1 flex flex-col items-center justify-end space-y-4 lg:order-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-8">
+        <div className="flex items-center">
+          <p className="mr-4 whitespace-nowrap text-sm font-bold">
+            Rows per page:
+          </p>
 
-        <p>{currentPage}</p>
+          <Select
+            onValueChange={(value) => setTake(parseInt(value, 10))}
+            defaultValue="10"
+            disabled={!data || isLoading}
+          >
+            <SelectTrigger className="max-w-[180px]">
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
 
-        {/* Go to next page. */}
-        <PaginationButton
-          onClick={() => setSkip(skip + take)}
-          disabled={!data || isLoading || data?.count <= skip + take}
-        >
-          <ChevronRight />
-        </PaginationButton>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+              <SelectItem value="250">250</SelectItem>
+              <SelectItem value="500">500</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Go to last page. */}
-        <PaginationButton
-          onClick={() => setSkip(data!.count - take)}
-          disabled={!data || isLoading || data?.count <= skip + take}
-        >
-          <ChevronLast />
-        </PaginationButton>
-      </div>
+        <div className="flex items-center space-x-3">
+          {/* Go to first page. */}
+          <PaginationButton
+            onClick={() => setSkip(0)}
+            disabled={isLoading || skip === 0}
+          >
+            <ChevronFirst />
+          </PaginationButton>
 
-      <div className="flex items-center">
-        <p className="mr-2 whitespace-nowrap text-sm font-bold">Per page:</p>
+          {/* Go to previous page. */}
+          <PaginationButton
+            onClick={() => setSkip(skip - take)}
+            disabled={isLoading || skip === 0}
+          >
+            <ChevronLeft />
+          </PaginationButton>
 
-        <Select
-          onValueChange={(value) => setTake(parseInt(value, 10))}
-          defaultValue="10"
-          disabled={!data || isLoading}
-        >
-          <SelectTrigger className="max-w-[180px]">
-            <SelectValue placeholder="Select a value" />
-          </SelectTrigger>
+          <p>
+            {currentPage} of {maxPage}
+          </p>
 
-          <SelectContent>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="25">25</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-            <SelectItem value="100">100</SelectItem>
-            <SelectItem value="250">250</SelectItem>
-            <SelectItem value="500">500</SelectItem>
-          </SelectContent>
-        </Select>
+          {/* Go to next page. */}
+          <PaginationButton
+            onClick={() => setSkip(skip + take)}
+            disabled={!data || isLoading || data?.count <= skip + take}
+          >
+            <ChevronRight />
+          </PaginationButton>
+
+          {/* Go to last page. */}
+          <PaginationButton
+            onClick={() => setSkip(data!.count - take)}
+            disabled={!data || isLoading || data?.count <= skip + take}
+          >
+            <ChevronLast />
+          </PaginationButton>
+        </div>
       </div>
     </div>
   );

@@ -43,16 +43,6 @@ export function ProductPrices({ products }: { products: Product[] }) {
         setSelectedProductId={handleSetSelectedProductId}
       />
 
-      <Pagination
-        isLoading={isLoading}
-        skip={skip}
-        setSkip={setSkip}
-        take={take}
-        setTake={setTake}
-        currentPage={currentPage}
-        data={data}
-      />
-
       {(isLoading || data?.products) && (
         <div className="mt-8">
           <div className="flex justify-between px-4 py-4 sm:px-8">
@@ -74,14 +64,15 @@ export function ProductPrices({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {data && data.count !== undefined && (
-        <p className="mt-4 px-4 text-sm font-medium text-slate-300 sm:px-8">
-          <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
-            {data.count}
-          </span>{" "}
-          products.
-        </p>
-      )}
+      <Pagination
+        isLoading={isLoading}
+        skip={skip}
+        setSkip={setSkip}
+        take={take}
+        setTake={setTake}
+        currentPage={currentPage}
+        data={data}
+      />
     </section>
   );
 }

@@ -7,7 +7,7 @@ export function PaginationButton({
   return (
     <button
       type="button"
-      className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-700 bg-transparent disabled:opacity-50"
+      className="flex h-6 w-6 items-center justify-center bg-transparent disabled:opacity-50"
       {...buttonProps}
     >
       {children}
