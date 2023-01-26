@@ -6,6 +6,7 @@ import type {
   BasicApiResponse,
   ProductPricesResponse as EndpointResponse,
 } from "@/lib/interfaces/api.interfaces";
+import { stringSearch } from "@/lib/utils";
 import { redis } from "@/lib/upstash";
 import prisma from "@/lib/prisma";
 
@@ -80,11 +81,12 @@ export default async function handler(
       return res.status(429).json({ message: "Too many requests" });
     }
 
-    const { productId, take = "100", skip = "0" } = req.query;
+    const { productId, restaurantQuery, take = "100", skip = "0" } = req.query;
 
     if (
       !productId ||
       Array.isArray(productId) ||
+      Array.isArray(restaurantQuery) ||
       Array.isArray(take) ||
       Array.isArray(skip)
     ) {
@@ -94,15 +96,34 @@ export default async function handler(
     // Load all product prices.
     const allProductPrices = await getProductPrices(productId, "asc");
 
+    // Copy the array so that we don't mutate the original.
+    // This is the array manipulated by filters and returned in the response.
+    let productPrices = [...allProductPrices];
+
+    // Filter by restaurant name, region, address, city and zipcode.
+    if (restaurantQuery) {
+      productPrices = productPrices.filter((productPrice) => {
+        const { name, region, address, city, zipcode } =
+          productPrice.restaurant;
+
+        return (
+          stringSearch(name, restaurantQuery) ||
+          stringSearch(region, restaurantQuery) ||
+          stringSearch(address, restaurantQuery) ||
+          stringSearch(city, restaurantQuery) ||
+          stringSearch(zipcode, restaurantQuery)
+        );
+      });
+    }
+
+    // Get the current count of product prices before mutating the array for the pagination.
+    const count = productPrices.length;
+
     // Apply pagination filters.
-    const productPrices = allProductPrices.slice(
+    productPrices = productPrices.slice(
       parseInt(skip, 10),
       parseInt(skip, 10) + parseInt(take, 10)
     );
-
-    const count = await prisma.restaurantProduct.count({
-      where: { product: { id: parseInt(productId, 10) } },
-    });
 
     return res.status(200).json({ count, products: productPrices });
   } catch (error) {
