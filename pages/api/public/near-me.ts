@@ -6,6 +6,7 @@ import type {
   RestaurantsNearMeResponse as EndpointResponse,
 } from "@/lib/interfaces/api.interfaces";
 import { WOOSMAP_KEY, DEFAULT_HEADERS } from "@/lib/constants";
+import { ratelimit } from "@/lib/upstash";
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,7 +14,19 @@ export default async function handler(
 ) {
   try {
     if (req.method !== "GET") {
+      res.setHeader("Access-Control-Allow-Headers", "GET");
       return res.status(405).json({ message: "Method not allowed" });
+    }
+
+    const ratelimitResponse = await ratelimit.limit("geoloc");
+
+    res.setHeader("X-RateLimit-Limit", ratelimitResponse.limit);
+    res.setHeader("X-RateLimit-Remaining", ratelimitResponse.remaining);
+    res.setHeader("X-RateLimit-Reset", ratelimitResponse.reset);
+
+    // Block request if rate-limit is exceeded.
+    if (!ratelimitResponse.success) {
+      return res.status(429).json({ message: "Too many requests" });
     }
 
     const { lat, lng } = req.query;

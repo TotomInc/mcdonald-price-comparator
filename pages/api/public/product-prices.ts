@@ -1,13 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { Prisma } from "@prisma/client";
-import { Ratelimit } from "@upstash/ratelimit";
 
 import type {
   BasicApiResponse,
   ProductPricesResponse as EndpointResponse,
 } from "@/lib/interfaces/api.interfaces";
 import { stringSearch } from "@/lib/utils";
-import { redis } from "@/lib/upstash";
+import { redis, ratelimit } from "@/lib/upstash";
 import prisma from "@/lib/prisma";
 
 type SortType = "asc" | "desc";
@@ -15,11 +14,6 @@ type SortType = "asc" | "desc";
 type PrismaProductPrices = Prisma.PromiseReturnType<
   typeof getPrismaProductPrices
 >;
-
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.fixedWindow(10, "15 s"),
-});
 
 /**
  * Get product prices from Prisma. This is a separate function so that we can
