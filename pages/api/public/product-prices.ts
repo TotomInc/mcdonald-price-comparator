@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { Prisma } from "@prisma/client";
+import { Ratelimit } from "@upstash/ratelimit";
 
 import { redis } from "@/lib/upstash";
 import prisma from "@/lib/prisma";
@@ -9,6 +10,11 @@ type SortType = "asc" | "desc";
 type PrismaProductPrices = Prisma.PromiseReturnType<
   typeof getPrismaProductPrices
 >;
+
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.fixedWindow(10, "15 s"),
+});
 
 /**
  * Get product prices from Prisma. This is a separate function so that we can
@@ -55,7 +61,19 @@ export default async function handler(
 ) {
   try {
     if (req.method !== "GET") {
+      res.setHeader("Access-Control-Allow-Headers", "GET");
       return res.status(405).json({ message: "Method not allowed" });
+    }
+
+    const ratelimitResponse = await ratelimit.limit("product-prices");
+
+    res.setHeader("X-RateLimit-Limit", ratelimitResponse.limit);
+    res.setHeader("X-RateLimit-Remaining", ratelimitResponse.remaining);
+    res.setHeader("X-RateLimit-Reset", ratelimitResponse.reset);
+
+    // Block request if rate-limit is exceeded.
+    if (!ratelimitResponse.success) {
+      return res.status(429).json({ message: "Too many requests" });
     }
 
     const { productId, take = "100", skip = "0" } = req.query;
