@@ -24,7 +24,6 @@ type PaginationProps = {
   setSkip: React.Dispatch<React.SetStateAction<number>>;
   take: number;
   setTake: React.Dispatch<React.SetStateAction<number>>;
-  currentPage: number;
   data: ProductPricesResponse | undefined;
 };
 
@@ -34,11 +33,12 @@ export function Pagination({
   setSkip,
   take,
   setTake,
-  currentPage,
   data,
 }: PaginationProps) {
   const [count, setCount] = React.useState<number>(0);
   const [maxPage, setMaxPage] = React.useState<number>(1);
+
+  const currentPage = Math.floor(skip / take) + 1;
 
   // On data change, make sure to update the cached count and maxPage values.
   // This is done to avoid CLS issues and stale rendered values.
