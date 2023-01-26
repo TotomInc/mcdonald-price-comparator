@@ -18,10 +18,21 @@ import { BASE_URL } from "@/lib/constants";
 import { findBurgerCategory, getProducts } from "@/lib/seed";
 import prisma from "@/lib/prisma";
 
+const MIN_STORE_ID = 16;
+const MAX_STORE_ID = 1705;
+
 async function createRestaurant(restaurantRef: string) {
-  const restaurantInfo = await fetch(
+  const response = await fetch(
     `${BASE_URL}/api/restaurants/${restaurantRef}/info`
-  ).then((response) => response.json() as Promise<RestaurantInfoResponse>);
+  );
+
+  if (!response.ok) {
+    return consola.info(
+      `Something went wrong in createRestaurant, /api/restaurants/${restaurantRef}/info is not a valid restaurantRef: ${response.status}`
+    );
+  }
+
+  const restaurantInfo = (await response.json()) as RestaurantInfoResponse;
 
   const createdOrUpdatedRestaurant = await prisma.restaurant.upsert({
     where: { storeId: restaurantRef },
@@ -170,39 +181,37 @@ export default async function handler(
     let hasCreatedCategories = true;
     let hasCreatedProducts = true;
 
-    const stores = await fetch(`${BASE_URL}/api/stores`).then(
-      (response) => response.json() as Promise<{ data: string[] }>
-    );
-
-    for (let i = 0; i < stores.data.length; i += 1) {
+    for (let i = MIN_STORE_ID; i < MAX_STORE_ID; i += 1) {
       const start = performance.now();
-      const restaurantRef = stores.data[i];
 
+      const restaurantRef = i.toString();
       const restaurant = await createRestaurant(restaurantRef);
 
-      if (!hasCreatedCategories) {
-        await createCategories(restaurantRef);
-        hasCreatedCategories = true;
-        consola.success("Initial categories created");
+      if (restaurant) {
+        if (!hasCreatedCategories) {
+          await createCategories(restaurantRef);
+          hasCreatedCategories = true;
+          consola.success("Initial categories created");
+        }
+
+        if (!hasCreatedProducts) {
+          await createProducts(restaurantRef);
+          hasCreatedProducts = true;
+          consola.success("Initial products created");
+        }
+
+        const count = await createRestaurantProducts(
+          restaurantRef,
+          restaurant.id
+        );
+
+        const stop = performance.now();
+        const duration = Math.round(stop - start);
+
+        consola.success(
+          `Restaurant ref ${restaurantRef} created ${count} product(s) in ${duration}ms`
+        );
       }
-
-      if (!hasCreatedProducts) {
-        await createProducts(restaurantRef);
-        hasCreatedProducts = true;
-        consola.success("Initial products created");
-      }
-
-      const count = await createRestaurantProducts(
-        restaurantRef,
-        restaurant.id
-      );
-
-      const stop = performance.now();
-      const duration = Math.round(stop - start);
-
-      consola.success(
-        `Restaurant ref ${restaurantRef} created ${count} product(s) in ${duration}ms`
-      );
     }
 
     consola.success(`Database successfully seeded`);
