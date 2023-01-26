@@ -55,7 +55,7 @@ export function Pagination({
         <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
           {count}
         </span>{" "}
-        products.
+        product{count === 1 ? null : "s"}.
       </p>
 
       <div className="order-1 flex flex-col items-center justify-end space-y-4 lg:order-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-8">
