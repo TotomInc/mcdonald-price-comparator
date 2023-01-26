@@ -28,7 +28,8 @@ export function ProductLocate({
       className={cn(
         "flex h-10 w-auto items-center justify-center rounded-md border border-slate-700 px-3 disabled:opacity-50",
         {
-          "bg-slate-700 text-white": isActive,
+          "border-indigo-500 bg-gradient-to-br from-pink-500 via-violet-500 to-indigo-500 text-white":
+            isActive,
         }
       )}
       disabled={disabled}
