@@ -36,7 +36,7 @@ export function ProductPrices({ products }: { products: Product[] }) {
   };
 
   return (
-    <>
+    <section>
       <ProductSelect
         isLoading={isLoading}
         products={products}
@@ -73,6 +73,15 @@ export function ProductPrices({ products }: { products: Product[] }) {
             ))}
         </div>
       )}
-    </>
+
+      {data && data.count !== undefined && (
+        <p className="mt-4 px-8 text-sm font-medium text-slate-300">
+          <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+            {data.count}
+          </span>{" "}
+          products.
+        </p>
+      )}
+    </section>
   );
 }
