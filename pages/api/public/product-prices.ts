@@ -2,6 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { Prisma } from "@prisma/client";
 import { Ratelimit } from "@upstash/ratelimit";
 
+import type {
+  BasicApiResponse,
+  ProductPricesResponse as EndpointResponse,
+} from "@/lib/interfaces/api.interfaces";
 import { redis } from "@/lib/upstash";
 import prisma from "@/lib/prisma";
 
@@ -57,7 +61,7 @@ async function getProductPrices(
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<BasicApiResponse | EndpointResponse>
 ) {
   try {
     if (req.method !== "GET") {
