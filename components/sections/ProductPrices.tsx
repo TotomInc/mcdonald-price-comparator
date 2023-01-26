@@ -9,7 +9,7 @@ import { ProductSelect } from "@/components/product-prices/ProductSelect";
 import { Pagination } from "@/components/product-prices/Pagination";
 import { ProductSkeleton } from "@/components/product-prices/ProductSkeleton";
 import { ProductItem } from "@/components/product-prices/ProductItem";
-import { fetcher, capitalizeWords } from "@/lib/utils";
+import { fetcher } from "@/lib/utils";
 
 export function ProductPrices({ products }: { products: Product[] }) {
   const [selectedProductId, setSelectedProductId] = React.useState<string>("");
