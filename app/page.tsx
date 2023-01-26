@@ -14,8 +14,16 @@ export default async function Home() {
         France Price Comparator
       </h1>
 
-      <p className="mb-12 text-center text-lg font-medium text-slate-300">
+      <p className="mb-8 text-center text-lg font-medium text-slate-300">
         Find out which McDonald&apos;s restaurant in France has the best prices.
+      </p>
+
+      <p className="mb-8 text-sm font-medium text-slate-500">
+        <span className="bg-gradient-to-r from-pink-500 via-violet-500 to-indigo-500 bg-clip-text text-transparent">
+          Tip
+        </span>
+        : find the cheapest nearby McDonald&apos;s restaurant by using the
+        geolocation button.
       </p>
 
       <ProductPrices products={products} />
