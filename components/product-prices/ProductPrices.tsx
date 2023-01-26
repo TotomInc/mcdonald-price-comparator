@@ -3,23 +3,28 @@
 import type { Product } from "@prisma/client";
 import * as React from "react";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 import type { ProductPricesResponse } from "@/lib/interfaces/api.interfaces";
 import { fetcher } from "@/lib/utils";
 
 import { ProductSelect } from "./ProductSelect";
-import { Pagination } from "./Pagination";
+import { ProductSearch } from "./ProductSearch";
 import { ProductSkeleton } from "./ProductSkeleton";
 import { ProductItem } from "./ProductItem";
+import { Pagination } from "./Pagination";
 
 export function ProductPrices({ products }: { products: Product[] }) {
   const [selectedProductId, setSelectedProductId] = React.useState<string>("");
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [take, setTake] = React.useState<number>(10);
   const [skip, setSkip] = React.useState<number>(0);
 
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 750);
+
   const { data, isLoading } = useSWR<ProductPricesResponse>(
     selectedProductId
-      ? `/api/public/product-prices?productId=${selectedProductId}&take=${take}&skip=${skip}`
+      ? `/api/public/product-prices?productId=${selectedProductId}&take=${take}&skip=${skip}&restaurantQuery=${debouncedSearchQuery}`
       : null,
     fetcher,
     { revalidateOnFocus: false }
@@ -37,11 +42,18 @@ export function ProductPrices({ products }: { products: Product[] }) {
 
   return (
     <section>
-      <ProductSelect
-        isLoading={isLoading}
-        products={products}
-        setSelectedProductId={handleSetSelectedProductId}
-      />
+      <div className="flex justify-between">
+        <ProductSelect
+          isLoading={isLoading}
+          products={products}
+          setSelectedProductId={handleSetSelectedProductId}
+        />
+
+        <ProductSearch
+          setSearchQuery={setSearchQuery}
+          disabled={isLoading || !data?.products}
+        />
+      </div>
 
       {(isLoading || data?.products) && (
         <div className="mt-8">
