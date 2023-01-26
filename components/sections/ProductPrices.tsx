@@ -4,74 +4,55 @@ import type { Product } from "@prisma/client";
 import * as React from "react";
 import useSWR from "swr";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectLabel,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select";
-import { capitalizeWords } from "@/lib/utils";
-
-type ProductPricesResponse = {
-  id: number;
-  price: number;
-  productId: number;
-  restaurantId: number;
-  restaurant: {
-    id: number;
-    city: string;
-    country: string;
-    name: string;
-    region: string;
-    storeId: string;
-    zipcode: string;
-  };
-}[];
-
-// @ts-ignore
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import type { ProductPricesResponse } from "@/lib/interfaces/api.interfaces";
+import { ProductSelect } from "@/components/product-prices/ProductSelect";
+import { Pagination } from "@/components/product-prices/Pagination";
+import { ProductSkeleton } from "@/components/product-prices/ProductSkeleton";
+import { ProductItem } from "@/components/product-prices/ProductItem";
+import { fetcher, capitalizeWords } from "@/lib/utils";
 
 export function ProductPrices({ products }: { products: Product[] }) {
   const [selectedProductId, setSelectedProductId] = React.useState<string>("");
+  const [take, setTake] = React.useState<number>(10);
+  const [skip, setSkip] = React.useState<number>(0);
 
   const { data, isLoading } = useSWR<ProductPricesResponse>(
-    `/api/public/product-prices?productId=${selectedProductId}`,
-    fetcher
+    selectedProductId
+      ? `/api/public/product-prices?productId=${selectedProductId}&take=${take}&skip=${skip}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: false }
   );
 
-  const sorted =
-    data && data.length ? data.sort((a, b) => a.price - b.price) : [];
+  const currentPage = Math.floor(skip / take) + 1;
+
+  // If the user selects a product, reset the skip value.
+  const handleSetSelectedProductId: React.Dispatch<
+    React.SetStateAction<string>
+  > = (productId) => {
+    setSelectedProductId(productId);
+    setSkip(0);
+  };
 
   return (
     <>
-      <h1 className="mb-12 bg-gradient-to-r from-pink-500 via-violet-500 to-indigo-500 bg-clip-text text-center text-3xl font-bold text-transparent">
-        McDonald&apos;s France Price Comparator
-      </h1>
+      <ProductSelect
+        isLoading={isLoading}
+        products={products}
+        setSelectedProductId={handleSetSelectedProductId}
+      />
 
-      <Select onValueChange={(value) => setSelectedProductId(value)}>
-        <SelectTrigger className="max-w-[250px]">
-          <SelectValue placeholder="Select a product" />
-        </SelectTrigger>
+      <Pagination
+        isLoading={isLoading}
+        skip={skip}
+        setSkip={setSkip}
+        take={take}
+        setTake={setTake}
+        currentPage={currentPage}
+        data={data}
+      />
 
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Burgers</SelectLabel>
-
-            {products.map((product) => (
-              <SelectItem key={product.id} value={product.id.toString()}>
-                {product.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-
-      {isLoading && <p className="mt-4">Loading...</p>}
-
-      {data && sorted ? (
+      {(isLoading || data?.products) && (
         <div className="mt-8">
           <div className="flex justify-between px-8 py-4">
             <p className="text-sm font-semibold">Restaurant</p>
@@ -79,32 +60,18 @@ export function ProductPrices({ products }: { products: Product[] }) {
             <p className="text-sm font-semibold">Price (in €)</p>
           </div>
 
-          {sorted.map((product) => (
-            <div
-              key={product.id}
-              className="flex items-center justify-between space-x-4 border-t border-slate-700 py-4 px-8"
-            >
-              <div className="flex flex-col">
-                <p className="font-medium">
-                  {capitalizeWords(product.restaurant.name)}
-                </p>
+          {isLoading &&
+            [...Array(10)].map((_, index) => (
+              <ProductSkeleton key={`skeleton-${index}`} />
+            ))}
 
-                <p className="text-sm text-slate-400">
-                  {capitalizeWords(product.restaurant.city)}&nbsp;
-                  <span>({capitalizeWords(product.restaurant.region)})</span>
-                </p>
-              </div>
-
-              <p className="text-lg font-medium">
-                {new Intl.NumberFormat("fr-FR", {
-                  style: "currency",
-                  currency: "EUR",
-                }).format(product.price / 100)}
-              </p>
-            </div>
-          ))}
+          {!isLoading &&
+            data?.products &&
+            data?.products.map((product) => (
+              <ProductItem key={product.id} product={product} />
+            ))}
         </div>
-      ) : null}
+      )}
     </>
   );
 }

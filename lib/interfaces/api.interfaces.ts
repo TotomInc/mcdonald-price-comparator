@@ -33,3 +33,23 @@ export type RestaurantCategoryProductsResponse = {
   pictures: Picture[];
   price: number;
 }[];
+
+// Response from endpoint `/api/public/product-prices`.
+export type ProductPricesResponse = {
+  count: number;
+  products: {
+    id: number;
+    price: number;
+    productId: number;
+    restaurantId: number;
+    restaurant: {
+      id: number;
+      city: string;
+      country: string;
+      name: string;
+      region: string;
+      storeId: string;
+      zipcode: string;
+    };
+  }[];
+};
